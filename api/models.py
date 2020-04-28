@@ -18,3 +18,7 @@ class User(AbstractUser):
     )
     role = models.CharField(max_length=20, choices=USER_ROLES, default='user')
     bio = models.TextField()
+
+    @property
+    def is_moderator(self):
+        return self.role == 'moderator'
