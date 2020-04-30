@@ -5,6 +5,11 @@ from .validators import validate_year, validate_score
 
 class User(AbstractUser):
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+    email = models.EmailField(unique=True)
+
+
     USER_ROLES = [
         ('admin', 'Администратор'),
         ('moderator', 'Модератор'),
@@ -24,7 +29,7 @@ class User(AbstractUser):
     def is_moderator(self):
         return self.role == 'moderator'
 
-
+      
 class Category(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
