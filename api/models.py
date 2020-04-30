@@ -29,7 +29,7 @@ class User(AbstractUser):
     def is_moderator(self):
         return self.role == 'moderator'
 
-
+      
 class Category(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
@@ -68,3 +68,4 @@ class Comment(models.Model):
     text = models.TextField()
     created = models.DateTimeField(
         "date of comment", auto_now_add=True, db_index=True)
+
