@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+   # 'django_filters',
     'api',
 ]
 
@@ -128,6 +129,8 @@ AUTH_USER_MODEL = 'api.User'
 
 REST_FRAMEWORK = {
         'DEFAULT_AUTHENTICATION_CLASSES': [
-            'rest_framework_simplejwt.authentication.JWTAuthentication',
+            'rest_framework_simplejwt.authentication.JWTAuthentication',           
         ],
+
+   #     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
