@@ -1,9 +1,11 @@
 from django.contrib.auth import authenticate
+from django.db.models import Avg
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import exceptions, serializers
-
 from rest_framework_simplejwt.state import User
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from .models import Category, Comment, Genre, Genre_Title, Review, Title
 
 
 class ConfirmationCodeField(serializers.CharField):
@@ -58,7 +60,8 @@ class EmailCodeTokenObtainSerializer(serializers.Serializer):
 
     @classmethod
     def get_token(cls, user):
-        raise NotImplementedError('Must implement `get_token` method for `TokenObtainSerializer` subclasses')
+        raise NotImplementedError(
+            'Must implement `get_token` method for `TokenObtainSerializer` subclasses')
 
 
 class EmailCodeTokenObtainPairSerializer(EmailCodeTokenObtainSerializer):
@@ -75,3 +78,66 @@ class EmailCodeTokenObtainPairSerializer(EmailCodeTokenObtainSerializer):
         data['access'] = str(refresh.access_token)
 
         return data
+
+
+class CategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = '__all__'
+        model = Category
+
+   # def to_representation(self, value):
+   #     serializer=CategorySerializer.save(self.value)
+   #     return serializer.data
+
+
+class GenreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = '__all__'
+        model = Genre
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Category.objects.all())
+    genres = serializers.SlugRelatedField(
+        slug_field='slug', many=True, queryset=Genre.objects.all())
+
+    # вариант с PrimaryKeyRelatedField
+    # genre = serializers.PrimaryKeyRelatedField(many=True, allow_null=True,read_only=True)
+    # еще такой вариант
+    # genre=GenreSerializer(read_only=True, many=True)
+    # category =CategorySerializer(read_only=True)
+    # Если вы явно указываете реляционное поле, указывающее на ManyToManyFieldсквозную модель, обязательно установите read_only значение True.
+
+    rating = serializers.SerializerMethodField()
+
+    def get_rating(self, obj):
+        reviews = Review.objects.filter(title=self.context['request'].title)
+        rating = round(reviews.aggregate(Avg('score'), 2))
+        return rating
+
+    class Meta:
+        #fields = '__all__'
+        model = Title
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Review
+        read_only_fields = ('pub_date',)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Comment
+        read_only_fields = ('pub_date',)
