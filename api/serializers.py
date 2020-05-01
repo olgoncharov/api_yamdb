@@ -68,3 +68,10 @@ class EmailCodeTokenObtainPairSerializer(EmailCodeTokenObtainSerializer):
         data['access'] = str(refresh.access_token)
 
         return data
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ['first_name', 'last_name', 'username', 'bio', 'email', 'role']
+        model = User

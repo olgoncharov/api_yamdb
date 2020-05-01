@@ -2,12 +2,15 @@ from uuid import uuid4
 
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
-from rest_framework import status
+from rest_framework import filters, status
 from rest_framework.response import Response
+from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .serializers import EmailCodeTokenObtainPairSerializer
+from .permissions import IsAdmin
+from .serializers import EmailCodeTokenObtainPairSerializer, UserSerializer
 
 
 User = get_user_model()
@@ -15,10 +18,12 @@ User = get_user_model()
 
 class EmailCodeTokenObtainPairView(TokenObtainPairView):
     serializer_class = EmailCodeTokenObtainPairSerializer
+    permission_classes = []
 
 
 class SendConfirmationCodeView(APIView):
     http_method_names = ['post',]
+    permission_classes = []
 
     def post(self, request):
         email = request.data.get('email', '')
@@ -51,3 +56,20 @@ class SendConfirmationCodeView(APIView):
             data={'error': 'Не удалось отправить код на email'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+class UsersViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['username']
+    lookup_field = 'username'
+    permission_classes = [IsAdmin]
+
+
+class PersonalUserView(RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        return self.request.user

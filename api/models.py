@@ -24,7 +24,11 @@ class User(AbstractUser):
         unique=True
     )
     role = models.CharField(max_length=20, choices=USER_ROLES, default='user')
-    bio = models.TextField()
+    bio = models.TextField(blank=True)
+
+    @property
+    def is_admin(self):
+        return (self.role == 'admin' or self.is_staff)
 
     @property
     def is_moderator(self):
