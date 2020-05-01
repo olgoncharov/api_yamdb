@@ -1,11 +1,35 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.contrib.auth import get_user_model
 from .validators import validate_year, validate_score
 
 
-User = get_user_model()
+class User(AbstractUser):
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+    email = models.EmailField(unique=True)
 
 
+    USER_ROLES = [
+        ('admin', 'Администратор'),
+        ('moderator', 'Модератор'),
+        ('user', 'Обычный пользователь'),
+    ]
+
+    confirmation_code = models.UUIDField(
+        blank=True,
+        editable=False,
+        null=True,
+        unique=True
+    )
+    role = models.CharField(max_length=20, choices=USER_ROLES, default='user')
+    bio = models.TextField()
+
+    @property
+    def is_moderator(self):
+        return self.role == 'moderator'
+
+      
 class Category(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
