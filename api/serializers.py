@@ -76,7 +76,8 @@ class EmailCodeTokenObtainPairSerializer(EmailCodeTokenObtainSerializer):
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        #fields = '__all__'
+        exclude = ['id']
         model = Category
 
    # def to_representation(self, value):
@@ -87,33 +88,35 @@ class CategorySerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        #fields = '__all__'
+        exclude = ['id']
         model = Genre
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    category = serializers.SlugRelatedField(
-        slug_field='slug', queryset=Category.objects.all())
-    genres = serializers.SlugRelatedField(
-        slug_field='slug', many=True, queryset=Genre.objects.all())
-
-    # вариант с PrimaryKeyRelatedField
-    # genre = serializers.PrimaryKeyRelatedField(many=True, allow_null=True,read_only=True)
-    # еще такой вариант
-    # genre=GenreSerializer(read_only=True, many=True)
-    # category =CategorySerializer(read_only=True)
-    # Если вы явно указываете реляционное поле, указывающее на ManyToManyFieldсквозную модель, обязательно установите read_only значение True.
+class BaseTitleSerializer(serializers.ModelSerializer):
 
     rating = serializers.SerializerMethodField()
 
     def get_rating(self, obj):
-        reviews = Review.objects.filter(title=self.context['request'].title)
-        rating = round(reviews.aggregate(Avg('score'), 2))
-        return rating
+        if obj.reviews.exists():
+            return obj.reviews.aggregate(rating=Avg('score')).get('rating')
+        return None
 
     class Meta:
-        #fields = '__all__'
+        fields = '__all__'
         model = Title
+
+
+class TitleSerializer(BaseTitleSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Category.objects.all())
+    genre = serializers.SlugRelatedField(
+        slug_field='slug', many=True, queryset=Genre.objects.all())
+
+
+class TitleSerializerDeep(BaseTitleSerializer):
+    category = CategorySerializer()
+    genre = GenreSerializer(many=True)
 
 
 class ReviewSerializer(serializers.ModelSerializer):
