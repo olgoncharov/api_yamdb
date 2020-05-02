@@ -16,20 +16,25 @@ class User(AbstractUser):
         ('user', 'Обычный пользователь'),
     ]
 
-    confirmation_code = models.UUIDField(
+    confirmation_code = models.CharField(
+        max_length=36,
         blank=True,
         editable=False,
         null=True,
         unique=True
     )
     role = models.CharField(max_length=20, choices=USER_ROLES, default='user')
-    bio = models.TextField()
+    bio = models.TextField(blank=True)
+
+    @property
+    def is_admin(self):
+        return (self.role == 'admin' or self.is_staff)
 
     @property
     def is_moderator(self):
         return self.role == 'moderator'
 
-      
+
 class Category(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)

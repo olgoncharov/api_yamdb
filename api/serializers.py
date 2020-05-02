@@ -1,9 +1,11 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import exceptions, serializers
 
-from rest_framework_simplejwt.state import User
 from rest_framework_simplejwt.tokens import RefreshToken
+
+
+User = get_user_model()
 
 
 class ConfirmationCodeField(serializers.CharField):
@@ -30,31 +32,22 @@ class EmailCodeTokenObtainSerializer(serializers.Serializer):
         self.fields['confirmation_code'] = ConfirmationCodeField()
 
     def validate(self, attrs):
-        authenticate_kwargs = {
-            self.username_field: attrs[self.username_field],
-            'confirmation_code': attrs['confirmation_code'],
-        }
-        try:
-            authenticate_kwargs['request'] = self.context['request']
-        except KeyError:
-            pass
+        email = attrs.get('email', '')
+        confirmation_code = attrs.get('confirmation_code', '')
 
-        self.user = authenticate(**authenticate_kwargs)
+        users = User.objects.filter(
+            email=email,
+            confirmation_code=confirmation_code
+        )
+        if users.exists():
+            self.user = users.first()
+            return {}
 
-        # Prior to Django 1.10, inactive users could be authenticated with the
-        # default `ModelBackend`.  As of Django 1.10, the `ModelBackend`
-        # prevents inactive users from authenticating.  App designers can still
-        # allow inactive users to authenticate by opting for the new
-        # `AllowAllUsersModelBackend`.  However, we explicitly prevent inactive
-        # users from authenticating to enforce a reasonable policy and provide
-        # sensible backwards compatibility with older Django versions.
-        if self.user is None or not self.user.is_active:
-            raise exceptions.AuthenticationFailed(
-                self.error_messages['no_active_account'],
-                'no_active_account',
-            )
+        raise exceptions.AuthenticationFailed(
+            self.error_messages['no_active_account'],
+            'no_active_account',
+        )
 
-        return {}
 
     @classmethod
     def get_token(cls, user):
@@ -75,3 +68,10 @@ class EmailCodeTokenObtainPairSerializer(EmailCodeTokenObtainSerializer):
         data['access'] = str(refresh.access_token)
 
         return data
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ['first_name', 'last_name', 'username', 'bio', 'email', 'role']
+        model = User
