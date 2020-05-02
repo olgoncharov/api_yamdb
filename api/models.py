@@ -49,28 +49,32 @@ class Title(models.Model):
     name = models.CharField(max_length=200)
     year = models.IntegerField(validators=[validate_year])
     genre = models.ManyToManyField(
-        Genre, blank=True, null=True, related_name="titles")
+        Genre, through='Genre_Title', through_fields=('title', 'genre'))
     category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, blank=True, null=True, related_name="titles")
-    description = models.TextField()
+        Category, on_delete=models.SET_NULL, blank=True, null=True, related_name='titles')
+    description = models.TextField(blank=True, null=True)
+
+
+class Genre_Title(models.Model):
+    title = models.ForeignKey(Title, on_delete=models.SET_NULL,blank=True, null=True)
+    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL,blank=True, null=True)
 
 
 class Review(models.Model):
     text = models.TextField()
     score = models.IntegerField(validators=[validate_score])
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="reviews")
-    pub_date = models.DateTimeField("date of review", auto_now_add=True)
+        User, on_delete=models.CASCADE, related_name='reviews')
+    pub_date = models.DateTimeField('date of review', auto_now_add=True)
     title = models.ForeignKey(
-        Title, on_delete=models.CASCADE, related_name="reviews")
+        Title, on_delete=models.CASCADE, related_name='reviews')
 
 
 class Comment(models.Model):
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="comments")
+        User, on_delete=models.CASCADE, related_name='comments')
     review = models.ForeignKey(
-        Review, on_delete=models.CASCADE, related_name="comments")
+        Review, on_delete=models.CASCADE, related_name='comments')
     text = models.TextField()
-    created = models.DateTimeField(
-        "date of comment", auto_now_add=True, db_index=True)
-
+    pub_date = models.DateTimeField(
+        'date of comment', auto_now_add=True, db_index=True)
