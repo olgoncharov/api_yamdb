@@ -25,6 +25,8 @@ urlpatterns = [
 
 v1_router = DefaultRouter()
 v1_router.register('users', views.UsersViewSet, basename='users')
+v1_router.register(r'categories', views.CategoryViewSet)
+v1_router.register(r'genres', views.GenreViewSet)
 
 urlpatterns += [
     path('v1/', include(v1_router.urls)),

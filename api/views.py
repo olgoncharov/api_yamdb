@@ -1,16 +1,20 @@
 from uuid import uuid4
 
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
+from django.http import Http404
 from rest_framework import filters, status
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .permissions import IsAdmin
-from .serializers import EmailCodeTokenObtainPairSerializer, UserSerializer
+from .permissions import IsAdmin, IsAdminOrReadOnly
+from .serializers import EmailCodeTokenObtainPairSerializer, UserSerializer, CategorySerializer, GenreSerializer
+from .models import Category, Genre
 
 
 User = get_user_model()
@@ -22,7 +26,7 @@ class EmailCodeTokenObtainPairView(TokenObtainPairView):
 
 
 class SendConfirmationCodeView(APIView):
-    http_method_names = ['post',]
+    http_method_names = ['post', ]
     permission_classes = []
 
     def post(self, request):
@@ -73,3 +77,33 @@ class PersonalUserView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class CategoryViewSet(ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    lookup_field = 'slug'
+    permission_classes = [IsAdminOrReadOnly, ]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', ]
+
+    def get_object(self):
+        try:
+            return super().get_object()
+        except Http404:
+            raise MethodNotAllowed(self.request.method)
+
+
+class GenreViewSet(ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    lookup_field = 'slug'
+    permission_classes = [IsAdminOrReadOnly, ]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', ]
+
+    def get_object(self):
+        try:
+            return super().get_object()
+        except Http404:
+            raise MethodNotAllowed(self.request.method)
