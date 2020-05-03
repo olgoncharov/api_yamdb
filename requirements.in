@@ -4,3 +4,4 @@ django
 djangorestframework
 pandas
 djangorestframework-simplejwt
+django-filter

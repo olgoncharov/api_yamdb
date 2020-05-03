@@ -2,15 +2,28 @@ from uuid import uuid4
 
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
 from rest_framework import filters, status
 from rest_framework.response import Response
 from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .permissions import IsAdmin
-from .serializers import EmailCodeTokenObtainPairSerializer, UserSerializer
+from .filters import TitleFilter
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorAdminModeratorOrReadOnly
+from .serializers import (
+    EmailCodeTokenObtainPairSerializer,
+    UserSerializer,
+    TitleSerializer,
+    TitleSerializerDeep,
+    CategorySerializer,
+    GenreSerializer,
+    ReviewSerializer,
+    CommentSerializer
+)
+from .models import Title, Category, Genre, Comment, Review
 
 
 User = get_user_model()
@@ -73,3 +86,64 @@ class PersonalUserView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class TitleViewSet(ModelViewSet):
+    queryset = Title.objects.all()
+    filterset_class = TitleFilter
+    filterset_fields = ['category', 'genre', 'year', 'name']
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_serializer_class(self):
+        print(self.action)
+        if self.action in ('create', 'partial_update'):
+            return TitleSerializer
+
+        return TitleSerializerDeep
+
+
+class CategoryViewSet(ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminOrReadOnly,]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name',]
+
+
+class GenreViewSet(ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = [IsAdminOrReadOnly,]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name',]
+
+
+class ReviewViewSet(ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorAdminModeratorOrReadOnly,]
+#    filter_backends = [filters.SearchFilter]
+#    search_fields = ['name',]    
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
+        serializer.save(author=self.request.user, title=title)
+
+#    def get_queryset(self):
+#        title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
+#        return title.reviews
+
+
+class CommentViewSet(ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorAdminModeratorOrReadOnly ]
+#    filter_backends = [filters.SearchFilter]
+#    search_fields = ['name',]    
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(Review, id=self.kwargs.get("review_id"))
+        serializer.save(author=self.request.user, review=review)
+
+#    def get_queryset(self):
+#        review = get_object_or_404(Review, id=self.kwargs.get("review_id"))
+#        return review.comments
