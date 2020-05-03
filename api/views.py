@@ -2,11 +2,13 @@ from uuid import uuid4
 
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, serializers
 from rest_framework.response import Response
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -109,6 +111,12 @@ class CategoryViewSet(ModelViewSet):
     permission_classes = [IsAdminOrReadOnly,]
     filter_backends = [filters.SearchFilter]
     search_fields = ['name',]
+
+    def get_object(self):
+        try:
+            return super().get_object()
+        except Http404:
+            raise MethodNotAllowed(self.request.method)
 
 
 class GenreViewSet(ModelViewSet):
