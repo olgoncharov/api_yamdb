@@ -27,11 +27,8 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
         if request.user.is_authenticated:
             return request.user.is_admin
-<<<<<<< HEAD
-
+          
         return False
-=======
->>>>>>> 2662c4ff4a4f7bc0970d196f3bba2240f47da26f
 
 
 class IsAdmin(permissions.BasePermission):

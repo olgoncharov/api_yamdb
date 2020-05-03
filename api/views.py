@@ -12,10 +12,17 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from .filters import TitleFilter
 from .permissions import IsAdmin, IsAdminOrReadOnly
-from .serializers import EmailCodeTokenObtainPairSerializer, UserSerializer, CategorySerializer, GenreSerializer
-from .models import Category, Genre
-
+from .serializers import (
+    EmailCodeTokenObtainPairSerializer,
+    UserSerializer,
+    TitleSerializer,
+    TitleSerializerDeep,
+    CategorySerializer,
+    GenreSerializer
+)
+from .models import Title, Category, Genre
 
 User = get_user_model()
 
@@ -77,6 +84,20 @@ class PersonalUserView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class TitleViewSet(ModelViewSet):
+    queryset = Title.objects.all()
+    filterset_class = TitleFilter
+    filterset_fields = ['category', 'genre', 'year', 'name']
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_serializer_class(self):
+        print(self.action)
+        if self.action in ('create', 'partial_update'):
+            return TitleSerializer
+
+        return TitleSerializerDeep
 
 
 class CategoryViewSet(ModelViewSet):
