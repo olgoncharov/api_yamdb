@@ -72,34 +72,13 @@ class EmailCodeTokenObtainPairSerializer(EmailCodeTokenObtainSerializer):
 
         return data
 
-"""
-class CategorySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        #fields = '__all__'
-        exclude = ['id']
-        model = Category
-
-   # def to_representation(self, value):
-   #     serializer=CategorySerializer.save(self.value)
-   #     return serializer.data
-
-
-class GenreSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        #fields = '__all__'
-        exclude = ['id']
-
-        model = Genre
-"""
-
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = 'name' , 'slug'
         model = Category
-   
+
+
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = 'name' , 'slug'
@@ -113,7 +92,6 @@ class BaseTitleSerializer(serializers.ModelSerializer):
         if obj.reviews.exists():
             return obj.reviews.aggregate(rating=Avg('score')).get('rating')
         return None
-
 
     class Meta:
         fields = '__all__'
@@ -147,7 +125,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='id', read_only=True)
         
     class Meta:
-        fields = ['id', 'title', 'text', 'pub_date', 'score', 'author']
+        fields = '__all__'
         model = Review
         read_only_fields = ('pub_date',)
 
@@ -163,4 +141,3 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Comment
         read_only_fields = ('pub_date',)
-
