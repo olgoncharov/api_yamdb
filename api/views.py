@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from rest_framework import filters, status
@@ -9,8 +10,9 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .permissions import IsAdmin
-from .serializers import EmailCodeTokenObtainPairSerializer, UserSerializer
+from .permissions import IsAdmin,IsAdminOrReadOnly
+from .serializers import EmailCodeTokenObtainPairSerializer, UserSerializer,CategorySerializer, GenreSerializer
+from .models import Category,Genre
 
 
 User = get_user_model()
@@ -73,3 +75,27 @@ class PersonalUserView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class CategoryViewSet(ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminOrReadOnly, ]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', ]
+    
+
+class GenreViewSet(ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = [IsAdminOrReadOnly, ]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', ]
+
+class CategorySlugViewSet(ModelViewSet):
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminOrReadOnly, ]
+
+    def get_queryset(self):
+        category = get_object_or_404(Category, slug=self.kwargs.get('slug'))
+        return category
