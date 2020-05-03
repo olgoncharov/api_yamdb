@@ -26,7 +26,7 @@ urlpatterns = [
 v1_router = DefaultRouter()
 v1_router.register('users', views.UsersViewSet, basename='users')
 v1_router.register('categories', views.CategoryViewSet)
-v1_router.register('categories/<category_slug>', views.CategorySlugViewSet,'category')
+#v1_router.register('categories/<category_slug>', views.CategorySlugViewSet,'category')
 #v1_router.register('categories/(?P<slug>\w+)', views.CategoryViewSet,'category')
 v1_router.register(r'genres', views.GenreViewSet)
 
