@@ -3,13 +3,14 @@ from uuid import uuid4
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, status
+from rest_framework import filters, status, serializers
 from rest_framework.response import Response
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
+
 
 from .filters import TitleFilter
 from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorAdminModeratorOrReadOnly
@@ -119,30 +120,47 @@ class GenreViewSet(ModelViewSet):
 
 
 class ReviewViewSet(ModelViewSet):
-    queryset = Review.objects.all()
+#    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorAdminModeratorOrReadOnly,]
+#    pagination_class = pass
 #    filter_backends = [filters.SearchFilter]
 #    search_fields = ['name',]    
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
+        reviews = Review.objects.filter(title=title)
+        return reviews
+
+
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
+
+        if Review.objects.filter(author=self.request.user, title=title).exists():
+            raise serializers.ValidationError(detail="Вы уже делали ревью на этот тайтл!!!",
+                                              code=status.HTTP_400_BAD_REQUEST)
+
         serializer.save(author=self.request.user, title=title)
 
-#    def get_queryset(self):
-#        title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
-#        return title.reviews
 
 
 class CommentViewSet(ModelViewSet):
-    queryset = Comment.objects.all()
+#    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorAdminModeratorOrReadOnly ]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorAdminModeratorOrReadOnly, ]
 #    filter_backends = [filters.SearchFilter]
 #    search_fields = ['name',]    
+
 
     def perform_create(self, serializer):
         review = get_object_or_404(Review, id=self.kwargs.get("review_id"))
         serializer.save(author=self.request.user, review=review)
+
+
+    def get_queryset(self):
+        review = get_object_or_404(Review, id=self.kwargs.get("review_id"))
+        comments = Comment.objects.filter(review=review)
+        return comments
 
 #    def get_queryset(self):
 #        review = get_object_or_404(Review, id=self.kwargs.get("review_id"))
