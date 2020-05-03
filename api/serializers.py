@@ -76,7 +76,7 @@ class EmailCodeTokenObtainPairSerializer(EmailCodeTokenObtainSerializer):
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        fields = 'slug','name'
         model = Category
 
    # def to_representation(self, value):
@@ -87,7 +87,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        fields = 'slug','name'
         model = Genre
 
 
