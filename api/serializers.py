@@ -76,19 +76,13 @@ class EmailCodeTokenObtainPairSerializer(EmailCodeTokenObtainSerializer):
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        #fields = '__all__'
         exclude = ['id']
         model = Category
-
-   # def to_representation(self, value):
-   #     serializer=CategorySerializer.save(self.value)
-   #     return serializer.data
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        #fields = '__all__'
         exclude = ['id']
         model = Genre
 
