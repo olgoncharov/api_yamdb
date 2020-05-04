@@ -1,4 +1,5 @@
 import sqlite3
+
 import pandas
 
 
@@ -7,8 +8,8 @@ def main():
     conn = sqlite3.connect('db.sqlite3')
     cursor = conn.cursor()
 
-    tables = ["User", "Genre", "Category", "Title", "Review", "Comment"]
-    csv_files = ["users.csv", "genre.csv", "category.csv", "genre_title.csv", "review.csv", "comments.csv"]
+    tables = [ "api_genre", "api_category", "api_title", "api_review", "api_comment"]
+    csv_files = [ "genre.csv", "category.csv", "genre_title.csv", "review.csv", "comments.csv"]
     index = 0
 
     for filename in csv_files:

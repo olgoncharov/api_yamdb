@@ -36,31 +36,39 @@ class User(AbstractUser):
 
 
 class Category(models.Model):
+    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
 
 
 class Genre(models.Model):
+    id = models.IntegerField(primary_key=True)
+
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
 
 
 class Title(models.Model):
+    id = models.IntegerField(primary_key=True)
+    title_id = models.IntegerField()
+
     name = models.CharField(max_length=200)
     year = models.IntegerField(validators=[validate_year])
     genre = models.ManyToManyField(
-        Genre, through='Genre_Title', through_fields=('title', 'genre'))
+        Genre, through='Genre_Title', through_fields=('title', 'genre'), blank=True, null=Truegit )
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, blank=True, null=True, related_name='titles')
     description = models.TextField(blank=True, null=True)
 
 
 class Genre_Title(models.Model):
+    id = models.IntegerField(primary_key=True)
     title = models.ForeignKey(Title, on_delete=models.SET_NULL,blank=True, null=True)
     genre = models.ForeignKey(Genre, on_delete=models.SET_NULL,blank=True, null=True)
 
 
 class Review(models.Model):
+    id = models.IntegerField(primary_key=True)
     text = models.TextField()
     score = models.IntegerField(validators=[validate_score])
     author = models.ForeignKey(
@@ -71,6 +79,7 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    id = models.IntegerField(primary_key=True)
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='comments')
     review = models.ForeignKey(
