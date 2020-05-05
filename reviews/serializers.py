@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import Review, Comment
+from .models import Comment, Review
 
 User = get_user_model()
 
@@ -9,6 +9,7 @@ User = get_user_model()
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True)
+
     title = serializers.SlugRelatedField(
         slug_field='id', read_only=True)
 

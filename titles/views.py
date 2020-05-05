@@ -4,11 +4,11 @@ from rest_framework import filters
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.viewsets import ModelViewSet
 
-from .filters import TitleFilter
-from users.permissions import IsAdminOrReadOnly
 from titles import serializers
+from users.permissions import IsAdminOrReadOnly
 
-from .models import Title, Category, Genre
+from .filters import TitleFilter
+from .models import Category, Genre, Title
 
 User = get_user_model()
 

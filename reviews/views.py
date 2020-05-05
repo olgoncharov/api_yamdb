@@ -1,13 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import status, serializers
+from rest_framework import serializers, status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.viewsets import ModelViewSet
 
-from users.permissions import IsAuthorAdminModeratorOrReadOnly
-from .serializers import ReviewSerializer, CommentSerializer
-from .models import Review
 from titles.models import Title
+from users.permissions import IsAuthorAdminModeratorOrReadOnly
+
+from .models import Review
+from .serializers import CommentSerializer, ReviewSerializer
 
 User = get_user_model()
 
