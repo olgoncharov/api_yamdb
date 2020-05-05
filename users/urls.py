@@ -3,7 +3,6 @@ from rest_framework.routers import DefaultRouter
 
 from users import views
 
-
 urlpatterns = [
     path(
         'v1/auth/token/',
