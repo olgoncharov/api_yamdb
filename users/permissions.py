@@ -12,9 +12,9 @@ class IsAuthorAdminModeratorOrReadOnly(permissions.BasePermission):
 
         return bool(
             request.user and (
-                request.user == obj.author or
-                request.user.is_moderator or
-                request.user.is_admin
+                    request.user == obj.author or
+                    request.user.is_moderator or
+                    request.user.is_admin
             )
         )
 
@@ -27,7 +27,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
         if request.user.is_authenticated:
             return request.user.is_admin
-          
+
         return False
 
 
