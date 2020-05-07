@@ -60,3 +60,6 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return f'{self.author}, {self.pub_date}: {self.text}'
