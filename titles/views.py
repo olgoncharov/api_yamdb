@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.http import Http404
-from rest_framework import filters
+from rest_framework import filters, mixins, viewsets
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.viewsets import ModelViewSet
 
@@ -25,7 +25,11 @@ class TitleViewSet(ModelViewSet):
         return serializers.TitleSerializerDeep
 
 
-class CategoryViewSet(ModelViewSet):
+class CategoryViewSet(viewsets.GenericViewSet,
+                      mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin):
+
     queryset = Category.objects.all()
     serializer_class = serializers.CategorySerializer
     lookup_field = 'slug'
@@ -33,23 +37,14 @@ class CategoryViewSet(ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', ]
 
-    def get_object(self):
-        try:
-            return super().get_object()
-        except Http404:
-            raise MethodNotAllowed(self.request.method)
 
-
-class GenreViewSet(ModelViewSet):
+class GenreViewSet(viewsets.GenericViewSet,
+                   mixins.ListModelMixin,
+                   mixins.CreateModelMixin,
+                   mixins.DestroyModelMixin):
     queryset = Genre.objects.all()
     serializer_class = serializers.GenreSerializer
     lookup_field = 'slug'
     permission_classes = [IsAdminOrReadOnly, ]
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', ]
-
-    def get_object(self):
-        try:
-            return super().get_object()
-        except Http404:
-            raise MethodNotAllowed(self.request.method)
